@@ -137,7 +137,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if !gameOver {
 		displayTime = displayHours + "h " + displayMinutes + "m " + displaySeconds + "s"
 	}
-	stringToDisplay += "Elapsed time: " + displayTime
+	stringToDisplay += "Elapsed time: " + displayTime + ". "
+
+	// Display amount of bolts user has
+	stringToDisplay += "Bolts available: " + strconv.Itoa(g.Player.BoltAmount)
 
 	if gameOver {
 		stringToDisplay += ". Game over! You've just got gobbled!"

@@ -2,19 +2,24 @@ package entities
 
 import (
 	"math"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 const (
-	PlayerSpeed = 1
+	PlayerSpeed       = 1
+	InitialBoltAmount = 10
 )
 
 type Player struct {
-	X        float64
-	Y        float64
-	Rotation float64
-	Image    *ebiten.Image // New field to store the loaded image
+	LoadTime       time.Time
+	BoltAmount     int
+	BoltShotBefore bool
+	X              float64
+	Y              float64
+	Rotation       float64
+	Image          *ebiten.Image // New field to store the loaded image
 }
 
 // In the Draw method of the Player struct
@@ -86,11 +91,33 @@ func (p *Player) Update(g *Game) {
 		p.X += PlayerSpeed
 	}
 
-	// Handle Player shooting
-	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+	// Handle Player shooting (enable one shot at a time and only if player has bolts available)
+	BoltToBeShotNow := ebiten.IsKeyPressed(ebiten.KeySpace)
+	if BoltToBeShotNow && !p.BoltShotBefore && p.BoltAmount > 0 {
+		p.BoltShotBefore = true
 		g.Player.Shoot(g)
+		p.removeBolt()
 	}
+	p.BoltShotBefore = BoltToBeShotNow
 
 	// Clamp rotation angle to [0, 2π)
 	p.Rotation = math.Mod(p.Rotation, 2*math.Pi)
+
+	// every 0.5 s add a bolt to the player
+	if time.Since(p.LoadTime).Seconds() >= 0.5 {
+		p.addBolt()
+
+		// Reset the timer for next spawn
+		p.LoadTime = time.Now()
+	}
+}
+
+func (p *Player) addBolt() {
+	if p.BoltAmount < 20 {
+		p.BoltAmount += 1
+	}
+}
+
+func (p *Player) removeBolt() {
+	p.BoltAmount -= 1
 }

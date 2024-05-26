@@ -1,10 +1,8 @@
 # Todo
 
-1. Limit the amount of arrows Player has to 10
-2. He can only shoot one a time
-3. If he runs out of them he has to pick up a package to refill
-4. Start making documentation
-5. Maybe integrate some tests into the project
+1. If he runs out of them he has to pick up a package to refill
+2. Start making documentation
+3. Maybe integrate some tests into the project
 
 ## How to approach documentation
 

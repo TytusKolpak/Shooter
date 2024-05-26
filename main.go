@@ -51,9 +51,11 @@ func main() {
 		EnemyImg:      entities.LoadSpriteFromSheet(enemySheet, 2, 0),
 		ProjectileImg: entities.LoadSpriteFromSheet(itemSheet, 0, 6),
 		Player: &entities.Player{
-			X:     entities.ScreenWidth / 2,
-			Y:     entities.ScreenHeight / 2,
-			Image: entities.LoadSpriteFromSheet(characterSheet, 2, 0),
+			BoltAmount: entities.InitialBoltAmount,
+			LoadTime:   time.Now(),
+			X:          entities.ScreenWidth / 2,
+			Y:          entities.ScreenHeight / 2,
+			Image:      entities.LoadSpriteFromSheet(characterSheet, 4, 0),
 		},
 	}
 
