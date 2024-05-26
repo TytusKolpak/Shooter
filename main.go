@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"shooter/entities"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -9,8 +10,6 @@ import (
 )
 
 const (
-	screenHeight             = 480
-	screenWidth              = 640
 	characterSpriteSheetPath = "sprites/rogues.png"
 	monsterSpriteSheetPath   = "sprites/monsters.png"
 	itemSpriteSheetPath      = "sprites/items.png"
@@ -18,6 +17,7 @@ const (
 )
 
 func main() {
+
 	var err error
 
 	// Load the background image
@@ -38,25 +38,26 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Load the player image from the sprite sheet
+	// Load the Player image from the sprite sheet
 	characterSheet, _, err := ebitenutil.NewImageFromFile(characterSpriteSheetPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	game := &Game{
-		spawnTime:     time.Now(),
-		backgroundImg: backgroundImage,
-		enemyImg:      loadSpriteFromSheet(enemySheet, 2, 0),
-		projectileImg: loadSpriteFromSheet(itemSheet, 0, 6),
-		player: &Player{
-			x:     screenWidth / 2,
-			y:     screenHeight / 2,
-			image: loadSpriteFromSheet(characterSheet, 2, 0),
+	// If importing from subdirectory they have to have first letter capitalized
+	game := &entities.Game{
+		SpawnTime:     time.Now(),
+		BackgroundImg: backgroundImage,
+		EnemyImg:      entities.LoadSpriteFromSheet(enemySheet, 2, 0),
+		ProjectileImg: entities.LoadSpriteFromSheet(itemSheet, 0, 6),
+		Player: &entities.Player{
+			X:     entities.ScreenWidth / 2,
+			Y:     entities.ScreenHeight / 2,
+			Image: entities.LoadSpriteFromSheet(characterSheet, 2, 0),
 		},
 	}
 
-	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetWindowSize(entities.ScreenWidth, entities.ScreenHeight)
 	ebiten.SetWindowTitle("Shoot them!")
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)

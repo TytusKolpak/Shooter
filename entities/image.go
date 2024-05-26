@@ -1,4 +1,4 @@
-package main
+package entities
 
 import (
 	"image"
@@ -6,7 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-func loadSpriteFromSheet(sheet *ebiten.Image, posX, posY int) *ebiten.Image {
+func LoadSpriteFromSheet(sheet *ebiten.Image, posX, posY int) *ebiten.Image {
 	spriteSize := 32
 
 	// Calculate coordinates of the sprite in the sprite sheet

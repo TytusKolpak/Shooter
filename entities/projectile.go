@@ -1,4 +1,4 @@
-package main
+package entities
 
 import (
 	"math"
@@ -8,7 +8,7 @@ import (
 
 const (
 	rotationSpeed   = 0.03
-	projectileSpeed = 10
+	Projectilespeed = 10
 )
 
 type Projectile struct {

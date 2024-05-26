@@ -1,4 +1,4 @@
-module awesomeGame
+module shooter
 
 go 1.22.3
 
