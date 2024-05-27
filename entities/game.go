@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"os"
 	"strconv"
 	"time"
 
@@ -13,7 +14,7 @@ import (
 )
 
 type Game struct {
-	BackgroundImg    *ebiten.Image
+	TileSheet        *ebiten.Image
 	ProjectileImg    *ebiten.Image
 	EnemyImg         *ebiten.Image
 	Enemies          []*Enemy
@@ -57,6 +58,25 @@ func (g *Game) Update() error {
 	}
 
 	if gameOver {
+		for id := range g.gamepadIDs {
+			// Center left button (so start or select or options or menu)
+			if ebiten.IsGamepadButtonPressed(id, ebiten.GamepadButton6) {
+				// Create "new" Game instance, by resetting variables
+				g.Enemies = nil
+				g.EnemiesDestroyed = 0
+				startTime = time.Now()
+				displayTime = ""
+				g.Player.BoltAmount = 10
+				g.Player.X = ScreenWidth / 2
+				g.Player.Y = ScreenHeight / 2
+
+				gameOver = false
+			}
+			// Center right button
+			if ebiten.IsGamepadButtonPressed(id, ebiten.GamepadButton7) {
+				os.Exit(0)
+			}
+		}
 		return nil
 	}
 
@@ -97,8 +117,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// Draw the background
-	opts := &ebiten.DrawImageOptions{}
-	screen.DrawImage(g.BackgroundImg, opts)
+	g.DrawBackground(screen)
 
 	// Create string representing the amount of Enemies destroyed
 	displayEnemiesDestroyed := strconv.Itoa(g.EnemiesDestroyed)
@@ -128,6 +147,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, stringToDisplay)
 
 	if gameOver {
+		ebitenutil.DebugPrintAt(screen, "Left Center button to Restart",
+			ScreenWidth/2-80, ScreenHeight/2-20)
+		ebitenutil.DebugPrintAt(screen, "Right Center button to Quit",
+			ScreenWidth/2-80, ScreenHeight/2+5)
 		return
 	}
 
@@ -146,6 +169,34 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 // Custom functions with a Game receiver below
+
+// Draw background by repeating an image
+func (g *Game) DrawBackground(screen *ebiten.Image) {
+	// Get the size of the screen
+	screenWidth, screenHeight := screen.Bounds().Dx(), screen.Bounds().Dy()
+
+	// Calculate the number of times the image needs to be drawn
+	horizontalTiles := (screenWidth + spriteSize - 1) / spriteSize
+	verticalTiles := (screenHeight + spriteSize - 1) / spriteSize
+
+	// Draw the image repeatedly to fill the screen
+	for y := 0; y < verticalTiles; y++ {
+		for x := 0; x < horizontalTiles; x++ {
+			opts := &ebiten.DrawImageOptions{}
+			opts.GeoM.Translate(float64(x*spriteSize), float64(y*spriteSize))
+			tileX := 0 //1,2,3
+			if x%3 == 2 {
+				tileX = 1 //1,2,3
+			} else if y%4 == 1 {
+				tileX = 2
+			} else {
+				tileX = 3
+			}
+			tile := LoadSpriteFromSheet(g.TileSheet, tileX, 7)
+			screen.DrawImage(tile, opts)
+		}
+	}
+}
 
 // Logic to spawn an enemy
 func (g *Game) spawnNewEnemy() {

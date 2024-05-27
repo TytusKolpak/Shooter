@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"shooter/entities"
 	"time"
@@ -14,15 +13,14 @@ const (
 	characterSpriteSheetPath = "sprites/rogues.png"
 	monsterSpriteSheetPath   = "sprites/monsters.png"
 	itemSpriteSheetPath      = "sprites/items.png"
-	backgroundImagePath      = "sprites/background.png"
+	tileSpriteSheetPath      = "sprites/tiles.png"
 )
 
 func main() {
-	fmt.Println("main")
 	var err error
 
-	// Load the background image
-	backgroundImage, _, err := ebitenutil.NewImageFromFile(backgroundImagePath)
+	// Load the background image (put these in entities somewhere)
+	tileSheet, _, err := ebitenutil.NewImageFromFile(tileSpriteSheetPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,7 +46,7 @@ func main() {
 	// If importing from subdirectory they have to have first letter capitalized
 	game := &entities.Game{
 		SpawnTime:     time.Now(),
-		BackgroundImg: backgroundImage,
+		TileSheet:     tileSheet,
 		EnemyImg:      entities.LoadSpriteFromSheet(enemySheet, 2, 0),
 		ProjectileImg: entities.LoadSpriteFromSheet(itemSheet, 0, 6),
 		Player: &entities.Player{
