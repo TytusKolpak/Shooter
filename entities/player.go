@@ -66,45 +66,37 @@ func (p *Player) Shoot(g *Game) {
 
 // Update method of the Player struct
 func (p *Player) Update(g *Game) {
-	// Update Player position and the angle he shoots at it has to be in if statement
-	// because user more than likely will use more than one at the same time
+	// We assume one player, so id=0. For more it would be 1, then 2 and so on
+	for id := range g.gamepadIDs {
+		LSH := ebiten.StandardGamepadAxisValue(id, ebiten.StandardGamepadAxisLeftStickHorizontal)
+		LSV := ebiten.StandardGamepadAxisValue(id, ebiten.StandardGamepadAxisLeftStickVertical)
+		RSH := ebiten.StandardGamepadAxisValue(id, ebiten.StandardGamepadAxisRightStickHorizontal)
+		RSV := ebiten.StandardGamepadAxisValue(id, ebiten.StandardGamepadAxisRightStickVertical)
 
-	// Arrow Keys control angle to shoot at
-	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		p.Rotation -= rotationSpeed
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		p.Rotation += rotationSpeed
+		// RIght stick is aiming //to modify
+		p.Rotation = math.Atan2(RSV, RSH)
+
+		// Left stick is movement
+		if math.Abs(LSH) > 0.1 {
+			p.X += LSH * PlayerSpeed
+		}
+		if math.Abs(LSV) > 0.1 {
+			p.Y += LSV * PlayerSpeed
+		}
+
+		// Handle Player shooting (enable one shot at a time and only if player has bolts available)
+		FBR := ebiten.StandardGamepadButtonValue(id, ebiten.StandardGamepadButtonFrontBottomRight)
+		BoltToBeShotNow := math.Abs(FBR) > 0.1
+		if BoltToBeShotNow && !p.BoltShotBefore && p.BoltAmount > 0 {
+			p.BoltShotBefore = true
+			g.Player.Shoot(g)
+			p.removeBolt()
+		}
+		p.BoltShotBefore = BoltToBeShotNow
 	}
 
-	// WSAD keys control movement
-	if ebiten.IsKeyPressed(ebiten.KeyW) {
-		p.Y -= PlayerSpeed
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyS) {
-		p.Y += PlayerSpeed
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		p.X -= PlayerSpeed
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		p.X += PlayerSpeed
-	}
-
-	// Handle Player shooting (enable one shot at a time and only if player has bolts available)
-	BoltToBeShotNow := ebiten.IsKeyPressed(ebiten.KeySpace)
-	if BoltToBeShotNow && !p.BoltShotBefore && p.BoltAmount > 0 {
-		p.BoltShotBefore = true
-		g.Player.Shoot(g)
-		p.removeBolt()
-	}
-	p.BoltShotBefore = BoltToBeShotNow
-
-	// Clamp rotation angle to [0, 2π)
-	p.Rotation = math.Mod(p.Rotation, 2*math.Pi)
-
-	// every 0.5 s add a bolt to the player
-	if time.Since(p.LoadTime).Seconds() >= 0.5 {
+	// every 0.75 s add a bolt to the player
+	if time.Since(p.LoadTime).Seconds() >= 0.75 {
 		p.addBolt()
 
 		// Reset the timer for next spawn

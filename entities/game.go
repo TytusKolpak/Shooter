@@ -2,7 +2,6 @@ package entities
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 	"strconv"
@@ -54,51 +53,6 @@ func (g *Game) Update() error {
 	for id := range g.gamepadIDs {
 		if inpututil.IsGamepadJustDisconnected(id) {
 			delete(g.gamepadIDs, id)
-		}
-	}
-
-	// Log button events.
-	for id := range g.gamepadIDs {
-		// All joystick inputs [0,1]
-		LSH := ebiten.StandardGamepadAxisValue(id, ebiten.StandardGamepadAxisLeftStickHorizontal)
-		LSV := ebiten.StandardGamepadAxisValue(id, ebiten.StandardGamepadAxisLeftStickVertical)
-		RSH := ebiten.StandardGamepadAxisValue(id, ebiten.StandardGamepadAxisRightStickHorizontal)
-		RSV := ebiten.StandardGamepadAxisValue(id, ebiten.StandardGamepadAxisRightStickVertical)
-		if math.Abs(LSH) > 0.1 {
-			log.Printf("Left horizontal stick value: %v", LSH)
-		}
-		if math.Abs(LSV) > 0.1 {
-			log.Printf("Left vertical stick value: %v", LSV)
-		}
-		if math.Abs(RSH) > 0.1 {
-			log.Printf("Right horizontal stick value: %v", RSH)
-		}
-		if math.Abs(RSV) > 0.1 {
-			log.Printf("Right vertical stick value: %v", RSV)
-		}
-
-		// All trigger inputs [0,1]
-		FBL := ebiten.StandardGamepadButtonValue(id, ebiten.StandardGamepadButtonFrontBottomLeft)
-		FBR := ebiten.StandardGamepadButtonValue(id, ebiten.StandardGamepadButtonFrontBottomRight)
-		if math.Abs(FBL) > 0.1 {
-			log.Printf("Left trigger value: %v", FBL)
-		}
-		if math.Abs(FBR) > 0.1 {
-			log.Printf("Right trigger stick value: %v", FBR)
-		}
-
-		// All buttons being pressed / just pressed 0/1
-		maxButton := ebiten.GamepadButton(ebiten.GamepadButtonCount(id))
-		for b := ebiten.GamepadButton(0); b < maxButton; b++ {
-			if ebiten.IsGamepadButtonPressed(id, b) {
-				log.Printf("button is being pressed: id: %d, button: %d", id, b)
-			}
-			if inpututil.IsGamepadButtonJustPressed(id, b) {
-				log.Printf("button pressed: id: %d, button: %d", id, b)
-			}
-			if inpututil.IsGamepadButtonJustReleased(id, b) {
-				log.Printf("button released: id: %d, button: %d", id, b)
-			}
 		}
 	}
 
