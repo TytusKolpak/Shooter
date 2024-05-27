@@ -1,8 +1,11 @@
 # Todo
 
 1. If he runs out of them he has to pick up a package to refill
-2. Start making documentation
-3. Maybe integrate some tests into the project
+2. Power ups
+3. Restart of the game
+4. Scores?
+5. Start making documentation
+6. Maybe integrate some tests into the project
 
 ## How to approach documentation
 

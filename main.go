@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"shooter/entities"
 	"time"
@@ -17,7 +18,7 @@ const (
 )
 
 func main() {
-
+	fmt.Println("main")
 	var err error
 
 	// Load the background image
