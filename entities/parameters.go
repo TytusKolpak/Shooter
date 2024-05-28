@@ -3,19 +3,23 @@ package entities
 import "time"
 
 const (
-	ScreenHeight             = 480
-	ScreenWidth              = 640
+	ScreenHeight = 480
+	ScreenWidth  = 640
+
 	CharacterSpriteSheetPath = "sprites/rogues.png"
 	MonsterSpriteSheetPath   = "sprites/monsters.png"
 	ItemSpriteSheetPath      = "sprites/items.png"
 	TileSpriteSheetPath      = "sprites/tiles.png"
-	PlayerSpeed              = 1
-	InitialBoltAmount        = 10
-	rotationSpeed            = 0.03
-	ProjectileSpeed          = 10
-	maxEnemySpeed            = 2
-	minEnemySpeed            = 0.2
-	spriteSize               = 32
+
+	PlayerSpeed       = 2
+	InitialBoltAmount = 10
+	rotationSpeed     = 0.03
+	ProjectileSpeed   = 10
+
+	maxEnemySpeed = 2
+	minEnemySpeed = 0.2
+
+	spriteSize = 32
 )
 
 var (

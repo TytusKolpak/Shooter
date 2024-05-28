@@ -7,11 +7,11 @@ import (
 )
 
 type Projectile struct {
-	x, y      float64
-	velocityX float64
-	velocityY float64
-	rotation  float64
-	img       *ebiten.Image
+	x, y                 float64
+	velocityX, velocityY float64
+	rotation             float64
+	active               bool
+	img                  *ebiten.Image
 }
 
 func (p *Projectile) Draw(screen *ebiten.Image) {
@@ -41,10 +41,22 @@ func (p *Projectile) Update() {
 }
 
 func checkCollision(p *Projectile, enm *Enemy) bool {
+	// Repeated use below
 	px, py := p.x, p.y
 
 	// Enemy width and height (modify if resizing the image)
 	ow, oh := float64(enm.img.Bounds().Dx()), float64(enm.img.Bounds().Dy())
 
 	return px > enm.x && px < enm.x+ow && py > enm.y && py < enm.y+oh
+}
+
+func checkPickup(prj *Projectile, plr *Player) bool {
+	// Repeated use below
+	prjx, prjy := prj.x, prj.y
+	plrx, plry := plr.X, plr.Y
+
+	// Player width and height (modify if resizing the image)
+	ow, oh := float64(plr.Img.Bounds().Dx()), float64(plr.Img.Bounds().Dy())
+
+	return prjx > plrx && prjx < plrx+ow && prjy > plry && prjy < plry+oh
 }

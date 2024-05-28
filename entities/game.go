@@ -48,6 +48,11 @@ func (g *Game) Update() error {
 		}
 	}
 
+	// Don't run the game if the gamepad is not connected
+	if len(g.gamepadIDs) == 0 {
+		return nil
+	}
+
 	if gameOver {
 		for id := range g.gamepadIDs {
 			// Center left button (so start or select or options or menu)
@@ -78,6 +83,9 @@ func (g *Game) Update() error {
 
 	// Check for collisions between Projectiles and Enemies
 	g.checkCollisions()
+
+	// Check for projectile pickup by the Player
+	g.checkPickups()
 
 	// Check if it's time to spawn a new enemy
 	if time.Since(g.SpawnTime).Seconds() >= 1 {
@@ -136,14 +144,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		return
 	}
 
-	// Draw all Enemies
-	for _, enm := range g.Enemies {
-		enm.Draw(screen)
-	}
-
 	// Draw all Projectiles
 	for _, p := range g.Projectiles {
 		p.Draw(screen)
+	}
+
+	// Draw all Enemies
+	for _, enm := range g.Enemies {
+		enm.Draw(screen)
 	}
 
 	// Draw the Player
@@ -154,12 +162,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 func (g *Game) ResetGame() {
 	g.Enemies = nil
+	g.Projectiles = nil
+
 	g.EnemiesDestroyed = 0
-	startTime = time.Now()
-	displayTime = ""
 	g.Player.BoltAmount = 10
 	g.Player.X = ScreenWidth / 2
 	g.Player.Y = ScreenHeight / 2
+
+	startTime = time.Now()
+	displayTime = ""
 	gameOver = false
 }
 
@@ -199,15 +210,36 @@ func (g *Game) checkCollisions() {
 	// Iterate over all Projectiles and Enemies to check for collisions
 	for i := len(g.Projectiles) - 1; i >= 0; i-- {
 		prj := g.Projectiles[i]
+
+		// If the projectile is laying on the ground then don't kill enemies with it
+		if !prj.active {
+			break
+		}
+
 		for j := len(g.Enemies) - 1; j >= 0; j-- {
 			enm := g.Enemies[j]
 			if checkCollision(prj, enm) {
-				// Remove the projectile and the enemy
-				g.Projectiles = append(g.Projectiles[:i], g.Projectiles[i+1:]...)
+				// Remove the enemy
 				g.Enemies = append(g.Enemies[:j], g.Enemies[j+1:]...)
 				g.EnemiesDestroyed++
+
+				// Leave the projectile
+				prj.velocityX, prj.velocityY = 0, 0
+				prj.active = false
 				break
 			}
+		}
+	}
+}
+
+func (g *Game) checkPickups() {
+	for i := len(g.Projectiles) - 1; i >= 0; i-- {
+		prj := g.Projectiles[i]
+
+		if checkPickup(prj, g.Player) {
+			g.Player.addBolt()
+			// Remove that projectile
+			g.Projectiles = append(g.Projectiles[:i], g.Projectiles[i+1:]...)
 		}
 	}
 }

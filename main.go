@@ -47,7 +47,7 @@ func main() {
 			LoadTime:   time.Now(),
 			X:          entities.ScreenWidth / 2,
 			Y:          entities.ScreenHeight / 2,
-			Image:      entities.LoadSpriteFromSheet(characterSheet, 4, 0),
+			Img:        entities.LoadSpriteFromSheet(characterSheet, 4, 0),
 		},
 	}
 

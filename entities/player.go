@@ -14,7 +14,7 @@ type Player struct {
 	X              float64
 	Y              float64
 	Rotation       float64
-	Image          *ebiten.Image // New field to store the loaded image
+	Img            *ebiten.Image // New field to store the loaded image
 }
 
 // In the Draw method of the Player struct
@@ -23,7 +23,7 @@ func (p *Player) Draw(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
 
 	// Get the dimensions of the image using Bounds()
-	w, h := p.Image.Bounds().Dx(), p.Image.Bounds().Dy()
+	w, h := p.Img.Bounds().Dx(), p.Img.Bounds().Dy()
 
 	// Translate to the center of the image before rotating
 	opts.GeoM.Translate(-float64(w)/2, -float64(h)/2)
@@ -37,7 +37,7 @@ func (p *Player) Draw(screen *ebiten.Image) {
 	opts.GeoM.Translate(p.X, p.Y)
 
 	// Draw the Player to the screen with the rotation options
-	screen.DrawImage(p.Image, opts)
+	screen.DrawImage(p.Img, opts)
 }
 
 // Shoot method of the Player struct
@@ -53,6 +53,7 @@ func (p *Player) Shoot(g *Game) {
 		rotation:  p.Rotation,
 		velocityX: vx,
 		velocityY: vy,
+		active:    true,
 		img:       g.ProjectileImg,
 	}
 
@@ -88,14 +89,6 @@ func (p *Player) Update(g *Game) {
 			p.removeBolt()
 		}
 		p.BoltShotBefore = BoltToBeShotNow
-	}
-
-	// every 0.75 s add a bolt to the player
-	if time.Since(p.LoadTime).Seconds() >= 0.75 {
-		p.addBolt()
-
-		// Reset the timer for next spawn
-		p.LoadTime = time.Now()
 	}
 }
 

@@ -1,9 +1,9 @@
 # Todo
 
-1. If he runs out of them he has to pick up a package to refill
+1. After a shutdown leave the bolt where it hit and enable its pickup to refill ammo
 2. Power ups
-3. Restart of the game
-4. Scores?
+3. Scores?
+4. What's up with this controller disconnection?
 5. Start making documentation
 6. Maybe integrate some tests into the project
 
