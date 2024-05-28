@@ -15,6 +15,7 @@ import (
 
 type Game struct {
 	TileSheet        *ebiten.Image
+	BackgroundImg    *ebiten.Image
 	ProjectileImg    *ebiten.Image
 	EnemyImg         *ebiten.Image
 	Enemies          []*Enemy
@@ -25,16 +26,6 @@ type Game struct {
 	gamepadIDsBuf    []ebiten.GamepadID
 	gamepadIDs       map[ebiten.GamepadID]struct{}
 }
-
-const (
-	ScreenHeight = 480
-	ScreenWidth  = 640
-)
-
-var (
-	startTime   = time.Now() // As far as i know this has to be here to happen only once
-	displayTime = ""         // Keep it as a global variable so that we can display it after the game is over
-)
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 	// Define the game's screen size.
@@ -62,15 +53,7 @@ func (g *Game) Update() error {
 			// Center left button (so start or select or options or menu)
 			if ebiten.IsGamepadButtonPressed(id, ebiten.GamepadButton6) {
 				// Create "new" Game instance, by resetting variables
-				g.Enemies = nil
-				g.EnemiesDestroyed = 0
-				startTime = time.Now()
-				displayTime = ""
-				g.Player.BoltAmount = 10
-				g.Player.X = ScreenWidth / 2
-				g.Player.Y = ScreenHeight / 2
-
-				gameOver = false
+				g.ResetGame()
 			}
 			// Center right button
 			if ebiten.IsGamepadButtonPressed(id, ebiten.GamepadButton7) {
@@ -109,15 +92,14 @@ func (g *Game) Update() error {
 
 // The order of drawing elements on the screen determines their z-index
 func (g *Game) Draw(screen *ebiten.Image) {
+	// It does have to be redrawn despite being static since ebiten clears screen every frame
+	screen.DrawImage(g.BackgroundImg, nil)
 
 	// Do not proceed with logic unless the gamepad is connected
 	if len(g.gamepadIDs) == 0 {
 		ebitenutil.DebugPrint(screen, "Please connect your gamepad.")
 		return
 	}
-
-	// Draw the background
-	g.DrawBackground(screen)
 
 	// Create string representing the amount of Enemies destroyed
 	displayEnemiesDestroyed := strconv.Itoa(g.EnemiesDestroyed)
@@ -170,32 +152,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 // Custom functions with a Game receiver below
 
-// Draw background by repeating an image
-func (g *Game) DrawBackground(screen *ebiten.Image) {
-	// Get the size of the screen
-	screenWidth, screenHeight := screen.Bounds().Dx(), screen.Bounds().Dy()
-
-	// Calculate the number of times the image needs to be drawn
-	horizontalTiles := (screenWidth + spriteSize - 1) / spriteSize
-	verticalTiles := (screenHeight + spriteSize - 1) / spriteSize
-
-	// Draw the image repeatedly to fill the screen
-	for y := 0; y < verticalTiles; y++ {
-		for x := 0; x < horizontalTiles; x++ {
-			opts := &ebiten.DrawImageOptions{}
-			opts.GeoM.Translate(float64(x*spriteSize), float64(y*spriteSize))
-			tileX := 0 //1,2,3
-			if x%3 == 2 {
-				tileX = 1 //1,2,3
-			} else if y%4 == 1 {
-				tileX = 2
-			} else {
-				tileX = 3
-			}
-			tile := LoadSpriteFromSheet(g.TileSheet, tileX, 7)
-			screen.DrawImage(tile, opts)
-		}
-	}
+func (g *Game) ResetGame() {
+	g.Enemies = nil
+	g.EnemiesDestroyed = 0
+	startTime = time.Now()
+	displayTime = ""
+	g.Player.BoltAmount = 10
+	g.Player.X = ScreenWidth / 2
+	g.Player.Y = ScreenHeight / 2
+	gameOver = false
 }
 
 // Logic to spawn an enemy

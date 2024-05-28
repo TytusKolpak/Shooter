@@ -7,11 +7,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const (
-	PlayerSpeed       = 1
-	InitialBoltAmount = 10
-)
-
 type Player struct {
 	LoadTime       time.Time
 	BoltAmount     int
@@ -48,8 +43,8 @@ func (p *Player) Draw(screen *ebiten.Image) {
 // Shoot method of the Player struct
 func (p *Player) Shoot(g *Game) {
 	// Calculate the velocity based on the Player's rotation
-	vx := math.Cos(p.Rotation) * Projectilespeed
-	vy := math.Sin(p.Rotation) * Projectilespeed
+	vx := math.Cos(p.Rotation) * ProjectileSpeed
+	vy := math.Sin(p.Rotation) * ProjectileSpeed
 
 	// Create a new projectile with the calculated velocity
 	proj := &Projectile{

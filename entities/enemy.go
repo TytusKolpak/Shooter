@@ -6,15 +6,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var (
-	gameOver = false
-)
-
-const (
-	maxEnemySpeed = 2
-	minEnemySpeed = 0.2
-)
-
 type Enemy struct {
 	img  *ebiten.Image
 	x, y float64

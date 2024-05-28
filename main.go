@@ -9,36 +9,29 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-const (
-	characterSpriteSheetPath = "sprites/rogues.png"
-	monsterSpriteSheetPath   = "sprites/monsters.png"
-	itemSpriteSheetPath      = "sprites/items.png"
-	tileSpriteSheetPath      = "sprites/tiles.png"
-)
-
 func main() {
 	var err error
 
 	// Load the background image (put these in entities somewhere)
-	tileSheet, _, err := ebitenutil.NewImageFromFile(tileSpriteSheetPath)
+	tileSheet, _, err := ebitenutil.NewImageFromFile(entities.TileSpriteSheetPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Load the item image from the sprite sheet
-	enemySheet, _, err := ebitenutil.NewImageFromFile(monsterSpriteSheetPath)
+	enemySheet, _, err := ebitenutil.NewImageFromFile(entities.MonsterSpriteSheetPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Load the item image from the sprite sheet
-	itemSheet, _, err := ebitenutil.NewImageFromFile(itemSpriteSheetPath)
+	itemSheet, _, err := ebitenutil.NewImageFromFile(entities.ItemSpriteSheetPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Load the Player image from the sprite sheet
-	characterSheet, _, err := ebitenutil.NewImageFromFile(characterSpriteSheetPath)
+	characterSheet, _, err := ebitenutil.NewImageFromFile(entities.CharacterSpriteSheetPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,7 +39,7 @@ func main() {
 	// If importing from subdirectory they have to have first letter capitalized
 	game := &entities.Game{
 		SpawnTime:     time.Now(),
-		TileSheet:     tileSheet,
+		BackgroundImg: entities.GenerateBackground(tileSheet),
 		EnemyImg:      entities.LoadSpriteFromSheet(enemySheet, 2, 0),
 		ProjectileImg: entities.LoadSpriteFromSheet(itemSheet, 0, 6),
 		Player: &entities.Player{

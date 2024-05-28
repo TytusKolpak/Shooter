@@ -6,11 +6,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const (
-	rotationSpeed   = 0.03
-	Projectilespeed = 10
-)
-
 type Projectile struct {
 	x, y      float64
 	velocityX float64
