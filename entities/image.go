@@ -2,9 +2,11 @@ package entities
 
 import (
 	"image"
+	"log"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 func LoadSpriteFromSheet(sheet *ebiten.Image, posX, posY int) *ebiten.Image {
@@ -47,4 +49,32 @@ func GenerateBackground(sheet *ebiten.Image) *ebiten.Image {
 	}
 
 	return composedImage
+}
+
+func LoadSpriteSheets() (*ebiten.Image, *ebiten.Image, *ebiten.Image, *ebiten.Image) {
+	// Load the background image (put these in entities somewhere)
+	tileSheet, _, err := ebitenutil.NewImageFromFile(TileSpriteSheetPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Load the item image from the sprite sheet
+	enemySheet, _, err := ebitenutil.NewImageFromFile(MonsterSpriteSheetPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Load the item image from the sprite sheet
+	itemSheet, _, err := ebitenutil.NewImageFromFile(ItemSpriteSheetPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Load the Player image from the sprite sheet
+	characterSheet, _, err := ebitenutil.NewImageFromFile(CharacterSpriteSheetPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return tileSheet, enemySheet, itemSheet, characterSheet
 }

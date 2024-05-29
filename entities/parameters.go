@@ -1,6 +1,8 @@
 package entities
 
-import "time"
+import (
+	"time"
+)
 
 const (
 	ScreenHeight = 480
@@ -15,15 +17,18 @@ const (
 	InitialBoltAmount = 10
 	rotationSpeed     = 0.03
 	ProjectileSpeed   = 10
+	StageDuration     = 10 // Seconds
 
-	maxEnemySpeed = 2
-	minEnemySpeed = 0.2
+	maxEnemySpeed = 0.75
 
 	spriteSize = 32
 )
 
 var (
-	startTime   = time.Now() // As far as i know this has to be here to happen only once
-	displayTime = ""         // Keep it as a global variable so that we can display it after the game is over
-	gameOver    = false
+	startTime     = time.Now() // As far as i know this has to be here to happen only once
+	pauseStart    = time.Now()
+	pauseDuration time.Duration
+	displayTime   = "" // Keep it as a global variable so that we can display it after the game is over
+	gameOver      = false
+	gamePaused    = false
 )

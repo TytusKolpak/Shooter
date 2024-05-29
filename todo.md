@@ -1,9 +1,9 @@
 # Todo
 
-1. After a shutdown leave the bolt where it hit and enable its pickup to refill ammo
-2. Power ups
-3. Scores?
-4. What's up with this controller disconnection?
+1. Reach should change depending on the enemy
+2. Pickup hitbox is funky
+3. Remove enemy clumping
+4. Power ups
 5. Start making documentation
 6. Maybe integrate some tests into the project
 

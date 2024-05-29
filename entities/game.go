@@ -17,12 +17,14 @@ type Game struct {
 	TileSheet        *ebiten.Image
 	BackgroundImg    *ebiten.Image
 	ProjectileImg    *ebiten.Image
+	EnemySheet       *ebiten.Image
 	EnemyImg         *ebiten.Image
 	Enemies          []*Enemy
 	Projectiles      []*Projectile
 	Player           *Player
 	SpawnTime        time.Time
 	EnemiesDestroyed int
+	Stage            int
 	gamepadIDsBuf    []ebiten.GamepadID
 	gamepadIDs       map[ebiten.GamepadID]struct{}
 }
@@ -33,12 +35,13 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func (g *Game) Update() error {
+	// --------------------------- Game behavior ---------------------------
 	if g.gamepadIDs == nil {
 		g.gamepadIDs = map[ebiten.GamepadID]struct{}{}
 	}
 
-	// Manage connecting and disconnecting gamepad(s)
-	g.gamepadIDsBuf = ebiten.AppendGamepadIDs(g.gamepadIDsBuf[:0])
+	// Log the gamepad connection events.
+	g.gamepadIDsBuf = inpututil.AppendJustConnectedGamepadIDs(g.gamepadIDsBuf[:0])
 	for _, id := range g.gamepadIDsBuf {
 		g.gamepadIDs[id] = struct{}{}
 	}
@@ -50,6 +53,18 @@ func (g *Game) Update() error {
 
 	// Don't run the game if the gamepad is not connected
 	if len(g.gamepadIDs) == 0 {
+		return nil
+	}
+
+	for id := range g.gamepadIDs {
+		// "Is...JustPressed", so that it will not fire multiple times
+		if inpututil.IsGamepadButtonJustPressed(id, ebiten.GamepadButton6) {
+			gamePaused = !gamePaused
+			pauseStart = time.Now().Add(-pauseDuration)
+		}
+	}
+
+	if gamePaused {
 		return nil
 	}
 
@@ -68,6 +83,7 @@ func (g *Game) Update() error {
 		return nil
 	}
 
+	// --------------------------- In game objects behavior ---------------------------
 	// Update Player
 	g.Player.Update(g)
 
@@ -77,23 +93,31 @@ func (g *Game) Update() error {
 	}
 
 	// Update all Projectiles
-	for _, p := range g.Projectiles {
-		p.Update()
-	}
+	for i := len(g.Projectiles) - 1; i >= 0; i-- {
+		prj := g.Projectiles[i]
+		prjx, prjy := prj.x, prj.y
 
+		// If projectile is out of the screen - remove it
+		if prjx < 0 || prjx > ScreenWidth || prjy < 0 || prjy > ScreenHeight {
+			g.Projectiles = append(g.Projectiles[:i], g.Projectiles[i+1:]...)
+		}
+		prj.Update()
+	}
 	// Check for collisions between Projectiles and Enemies
 	g.checkCollisions()
 
 	// Check for projectile pickup by the Player
 	g.checkPickups()
 
-	// Check if it's time to spawn a new enemy
-	if time.Since(g.SpawnTime).Seconds() >= 1 {
+	// Check if it's time to spawn a new enemy and not last stage
+	if g.Stage != 4 && time.Since(g.SpawnTime).Seconds() >= 1 {
 		g.spawnNewEnemy()
 
 		// Reset the timer for next spawn
 		g.SpawnTime = time.Now()
 	}
+
+	g.controlGameStage()
 
 	return nil
 }
@@ -106,6 +130,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Do not proceed with logic unless the gamepad is connected
 	if len(g.gamepadIDs) == 0 {
 		ebitenutil.DebugPrint(screen, "Please connect your gamepad.")
+		startTime = time.Now()
 		return
 	}
 
@@ -115,6 +140,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// Create string representing elapsed time
 	elapsedTime := time.Since(startTime)
+	if gamePaused {
+		pauseDuration = time.Since(pauseStart)
+		ebitenutil.DebugPrintAt(screen, "Game Paused",
+			ScreenWidth/2-40, ScreenHeight/2-10)
+	}
+	elapsedTime -= pauseDuration
 	secondsPassed := int(math.Round(elapsedTime.Seconds()))
 	displaySeconds := strconv.Itoa(secondsPassed % 60)
 	minutesPassed := secondsPassed / 60
@@ -129,18 +160,22 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Display amount of bolts user has
 	stringToDisplay += fmt.Sprintln("Bolts available: " + strconv.Itoa(g.Player.BoltAmount))
 
-	if gameOver {
-		stringToDisplay += fmt.Sprintln("Game over! You've just got gobbled!")
-	}
-
 	// Display on the screen
 	ebitenutil.DebugPrint(screen, stringToDisplay)
 
 	if gameOver {
 		ebitenutil.DebugPrintAt(screen, "Left Center button to Restart",
-			ScreenWidth/2-80, ScreenHeight/2-20)
+			ScreenWidth/2-86, ScreenHeight/2-20)
 		ebitenutil.DebugPrintAt(screen, "Right Center button to Quit",
 			ScreenWidth/2-80, ScreenHeight/2+5)
+
+		if g.Stage == 4 && len(g.Enemies) == 0 {
+			ebitenutil.DebugPrintAt(screen, "YOU WIN! :D",
+				ScreenWidth/2-35, ScreenHeight/2-40)
+		} else {
+			ebitenutil.DebugPrintAt(screen, "Game over! You've just got gobbled!",
+				ScreenWidth/2-100, ScreenHeight/2-50)
+		}
 		return
 	}
 
@@ -163,14 +198,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func (g *Game) ResetGame() {
 	g.Enemies = nil
 	g.Projectiles = nil
+	g.EnemyImg = LoadSpriteFromSheet(g.EnemySheet, 0, 2)
+	g.Stage = 1
 
 	g.EnemiesDestroyed = 0
 	g.Player.BoltAmount = 10
 	g.Player.X = ScreenWidth / 2
 	g.Player.Y = ScreenHeight / 2
+	g.Player.BoltAmount = InitialBoltAmount
 
 	startTime = time.Now()
 	displayTime = ""
+	pauseDuration = 0
 	gameOver = false
 }
 
@@ -236,10 +275,32 @@ func (g *Game) checkPickups() {
 	for i := len(g.Projectiles) - 1; i >= 0; i-- {
 		prj := g.Projectiles[i]
 
+		// Don't consider it for pickup if it's flying
+		if prj.active {
+			continue
+		}
+
 		if checkPickup(prj, g.Player) {
 			g.Player.addBolt()
 			// Remove that projectile
 			g.Projectiles = append(g.Projectiles[:i], g.Projectiles[i+1:]...)
 		}
+	}
+}
+
+func (g *Game) controlGameStage() {
+	// If 1 minute has passed
+	if g.Stage == 1 && time.Since(startTime).Seconds() > StageDuration {
+		g.EnemyImg = LoadSpriteFromSheet(g.EnemySheet, 0, 0)
+		g.Stage = 2
+	} else if g.Stage == 2 && time.Since(startTime).Seconds() > 2*StageDuration {
+		g.EnemyImg = LoadSpriteFromSheet(g.EnemySheet, 0, 1)
+		g.Stage = 3
+	} else if g.Stage == 3 && time.Since(startTime).Seconds() > 3*StageDuration {
+		g.Stage = 4
+	} else if g.Stage == 4 && len(g.Enemies) == 0 {
+		fmt.Println("Last stage and no enemies")
+		// You win
+		gameOver = true
 	}
 }

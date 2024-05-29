@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -19,7 +20,7 @@ func (p *Projectile) Draw(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
 
 	// Shrink the projectile
-	opts.GeoM.Scale(0.5, 0.5)
+	// opts.GeoM.Scale(0.5, 0.5)
 
 	// Set the position of the projectile for reference to rotation before any rotation
 	opts.GeoM.Translate(-16, -16)
@@ -35,6 +36,7 @@ func (p *Projectile) Draw(screen *ebiten.Image) {
 }
 
 func (p *Projectile) Update() {
+	fmt.Println("Update projectile", p.x, p.y)
 	// Move the projectile based on its velocity
 	p.x += p.velocityX
 	p.y += p.velocityY

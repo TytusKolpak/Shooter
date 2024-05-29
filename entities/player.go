@@ -93,7 +93,7 @@ func (p *Player) Update(g *Game) {
 }
 
 func (p *Player) addBolt() {
-	if p.BoltAmount < 20 {
+	if p.BoltAmount < InitialBoltAmount {
 		p.BoltAmount += 1
 	}
 }

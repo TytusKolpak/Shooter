@@ -19,7 +19,6 @@ func (enm *Enemy) Update(p *Player) {
 	// Calculate the max distance an enemy could pass
 	mx := (float64(destPointX) - float64(enm.img.Bounds().Dx())/2)
 	my := (float64(destPointY) - float64(enm.img.Bounds().Dy())/2)
-	maxDistance := math.Sqrt(mx*mx + my*my)
 
 	// Calculate the direction vector towards the center
 	dx := mx - enm.x
@@ -38,10 +37,9 @@ func (enm *Enemy) Update(p *Player) {
 	dirX := dx / distance
 	dirY := dy / distance
 
-	// Move the image towards the center (slow down the closer they are)
-	enm.x += dirX * maxEnemySpeed * (distance/maxDistance + minEnemySpeed)
-	// Something is funky here (they are faster if im at let upper corner)
-	enm.y += dirY * maxEnemySpeed * (distance/maxDistance + minEnemySpeed)
+	// Move the image towards the center
+	enm.x += dirX * maxEnemySpeed
+	enm.y += dirY * maxEnemySpeed
 }
 
 func (enm *Enemy) Draw(screen *ebiten.Image) {
