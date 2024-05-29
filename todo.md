@@ -1,11 +1,12 @@
 # Todo
 
-1. Reach should change depending on the enemy
-2. Pickup hitbox is funky
-3. Remove enemy clumping
-4. Power ups
-5. Start making documentation
-6. Maybe integrate some tests into the project
+1. Pause on game over funky
+2. Reach should change depending on the enemy
+3. Pickup hitbox is funky
+4. Remove enemy clumping
+5. Power ups
+6. Start making documentation
+7. Maybe integrate some tests into the project
 
 ## How to approach documentation
 

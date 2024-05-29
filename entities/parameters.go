@@ -17,7 +17,7 @@ const (
 	InitialBoltAmount = 10
 	rotationSpeed     = 0.03
 	ProjectileSpeed   = 10
-	StageDuration     = 10 // Seconds
+	StageDuration     = 30 // Seconds
 
 	maxEnemySpeed = 0.75
 

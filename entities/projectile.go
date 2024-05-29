@@ -1,7 +1,8 @@
+// Package entities deals with the character and behavior of all game elements
+// including Player, Enemy, Projectile, but also things like global parameters and Game itself.
 package entities
 
 import (
-	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -36,7 +37,6 @@ func (p *Projectile) Draw(screen *ebiten.Image) {
 }
 
 func (p *Projectile) Update() {
-	fmt.Println("Update projectile", p.x, p.y)
 	// Move the projectile based on its velocity
 	p.x += p.velocityX
 	p.y += p.velocityY
