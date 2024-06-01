@@ -1,9 +1,9 @@
 # Todo
 
-1. Pause on game over funky
+1. Pickup hitbox is funky
 2. Reach should change depending on the enemy
-3. Pickup hitbox is funky
-4. Remove enemy clumping
+3. Remove enemy clumping
+4. 2 Players
 5. Power ups
 6. Start making documentation
 7. Maybe integrate some tests into the project

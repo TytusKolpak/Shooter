@@ -15,15 +15,15 @@ func main() {
 	game := &entities.Game{
 		SpawnTime:     time.Now(),
 		BackgroundImg: entities.GenerateBackground(tileSheet),
-		EnemyImg:      entities.LoadSpriteFromSheet(enemySheet, 0, 2),
+		EnemyImg:      entities.AddBoundingBox(entities.LoadSpriteFromSheet(enemySheet, 0, 2)),
 		EnemySheet:    enemySheet,
-		ProjectileImg: entities.LoadSpriteFromSheet(projectileSheet, 0, 6),
+		ProjectileImg: entities.AddBoundingBox(entities.LoadSpriteFromSheet(projectileSheet, 0, 6)),
 		Player: &entities.Player{
 			BoltAmount: entities.InitialBoltAmount,
 			LoadTime:   time.Now(),
 			X:          entities.ScreenWidth / 2,
 			Y:          entities.ScreenHeight / 2,
-			Img:        entities.LoadSpriteFromSheet(playerSheet, 4, 0),
+			Img:        entities.AddBoundingBox(entities.LoadSpriteFromSheet(playerSheet, 4, 0)),
 		},
 		Stage: 1,
 	}

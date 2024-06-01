@@ -17,9 +17,10 @@ const (
 	InitialBoltAmount = 10
 	rotationSpeed     = 0.03
 	ProjectileSpeed   = 10
-	StageDuration     = 30 // Seconds
+	StageDuration     = 10 // Seconds
 
 	maxEnemySpeed = 0.75
+	spawnInterval = 2
 
 	spriteSize = 32
 )

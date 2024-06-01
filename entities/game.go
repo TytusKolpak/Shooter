@@ -51,35 +51,46 @@ func (g *Game) Update() error {
 		}
 	}
 
-	// Don't run the game if the gamepad is not connected
-	if len(g.gamepadIDs) == 0 {
+	if gameOver {
+		if len(g.gamepadIDs) != 0 {
+			for id := range g.gamepadIDs {
+				// Center left button (so start or select or options or menu)
+				if ebiten.IsGamepadButtonPressed(id, ebiten.GamepadButton6) {
+					// Create "new" Game instance, by resetting variables
+					g.ResetGame()
+				}
+				// Center right button
+				if ebiten.IsGamepadButtonPressed(id, ebiten.GamepadButton7) {
+					os.Exit(0)
+				}
+			}
+		} else {
+			if ebiten.IsKeyPressed(ebiten.KeyR) {
+				g.ResetGame()
+			}
+			if ebiten.IsKeyPressed(ebiten.KeyQ) {
+				os.Exit(0)
+			}
+		}
 		return nil
-	}
-
-	for id := range g.gamepadIDs {
-		// "Is...JustPressed", so that it will not fire multiple times
-		if inpututil.IsGamepadButtonJustPressed(id, ebiten.GamepadButton6) {
-			gamePaused = !gamePaused
-			pauseStart = time.Now().Add(-pauseDuration)
+	} else {
+		if len(g.gamepadIDs) != 0 {
+			for id := range g.gamepadIDs {
+				// "Is...JustPressed", so that it will not fire multiple times
+				if inpututil.IsGamepadButtonJustPressed(id, ebiten.GamepadButton6) {
+					gamePaused = !gamePaused
+					pauseStart = time.Now().Add(-pauseDuration)
+				}
+			}
+		} else {
+			if ebiten.IsKeyPressed(ebiten.KeyP) {
+				gamePaused = !gamePaused
+				pauseStart = time.Now().Add(-pauseDuration)
+			}
 		}
 	}
 
 	if gamePaused {
-		return nil
-	}
-
-	if gameOver {
-		for id := range g.gamepadIDs {
-			// Center left button (so start or select or options or menu)
-			if ebiten.IsGamepadButtonPressed(id, ebiten.GamepadButton6) {
-				// Create "new" Game instance, by resetting variables
-				g.ResetGame()
-			}
-			// Center right button
-			if ebiten.IsGamepadButtonPressed(id, ebiten.GamepadButton7) {
-				os.Exit(0)
-			}
-		}
 		return nil
 	}
 
@@ -110,7 +121,7 @@ func (g *Game) Update() error {
 	g.checkPickups()
 
 	// Check if it's time to spawn a new enemy and not last stage
-	if g.Stage != 4 && time.Since(g.SpawnTime).Seconds() >= 1 {
+	if g.Stage != 4 && time.Since(g.SpawnTime).Seconds() >= spawnInterval {
 		g.spawnNewEnemy()
 
 		// Reset the timer for next spawn
@@ -129,9 +140,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// Do not proceed with logic unless the gamepad is connected
 	if len(g.gamepadIDs) == 0 {
-		ebitenutil.DebugPrint(screen, "Please connect your gamepad.")
-		startTime = time.Now()
-		return
+		ebitenutil.DebugPrintAt(screen, "Using Keyboard", 0, ScreenHeight-15)
+	} else {
+		ebitenutil.DebugPrintAt(screen, "Using Gamepad", 0, ScreenHeight-15)
 	}
 
 	// Create string representing the amount of Enemies destroyed
@@ -142,8 +153,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	elapsedTime := time.Since(startTime)
 	if gamePaused {
 		pauseDuration = time.Since(pauseStart)
-		ebitenutil.DebugPrintAt(screen, "Game Paused",
-			ScreenWidth/2-40, ScreenHeight/2-10)
+		ebitenutil.DebugPrintAt(screen, "Game Paused", ScreenWidth/2-40, ScreenHeight/2-10)
 	}
 	elapsedTime -= pauseDuration
 	secondsPassed := int(math.Round(elapsedTime.Seconds()))
@@ -164,17 +174,27 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, stringToDisplay)
 
 	if gameOver {
-		ebitenutil.DebugPrintAt(screen, "Left Center button to Restart",
-			ScreenWidth/2-86, ScreenHeight/2-20)
-		ebitenutil.DebugPrintAt(screen, "Right Center button to Quit",
-			ScreenWidth/2-80, ScreenHeight/2+5)
+		restartText := ""
+		quitText := ""
+		if len(g.gamepadIDs) != 0 {
+			restartText = "Left Center button to Restart"
+			quitText = "Right Center button to Quit"
+		} else {
+			restartText = "R key to Restart"
+			quitText = "Q key to Quit"
+		}
+
+		messageFrameX := ScreenWidth/2 - 90
+		messageFrameY := ScreenHeight/2 - 50
+		lineHeight := 15
+
+		ebitenutil.DebugPrintAt(screen, restartText, messageFrameX, messageFrameY)
+		ebitenutil.DebugPrintAt(screen, quitText, messageFrameX, messageFrameY+lineHeight)
 
 		if g.Stage == 4 && len(g.Enemies) == 0 {
-			ebitenutil.DebugPrintAt(screen, "YOU WIN! :D",
-				ScreenWidth/2-35, ScreenHeight/2-40)
+			ebitenutil.DebugPrintAt(screen, "YOU WIN! :D", messageFrameX, messageFrameY+2*lineHeight)
 		} else {
-			ebitenutil.DebugPrintAt(screen, "Game over! You've just got gobbled!",
-				ScreenWidth/2-100, ScreenHeight/2-50)
+			ebitenutil.DebugPrintAt(screen, "Game over! You've just got gobbled!", messageFrameX, messageFrameY+2*lineHeight)
 		}
 		return
 	}
@@ -198,7 +218,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 func (g *Game) ResetGame() {
 	g.Enemies = nil
 	g.Projectiles = nil
-	g.EnemyImg = LoadSpriteFromSheet(g.EnemySheet, 0, 2)
+	g.EnemyImg = AddBoundingBox(LoadSpriteFromSheet(g.EnemySheet, 0, 2))
 	g.Stage = 1
 
 	g.EnemiesDestroyed = 0
@@ -217,7 +237,8 @@ func (g *Game) ResetGame() {
 func (g *Game) spawnNewEnemy() {
 	// Create a new Enemy
 	enm := &Enemy{
-		img: g.EnemyImg,
+		img:   g.EnemyImg,
+		reach: spriteSize,
 	}
 
 	// Randomly choose an edge (0=left, 1=top, 2=right, 3=bottom)
@@ -291,10 +312,10 @@ func (g *Game) checkPickups() {
 func (g *Game) controlGameStage() {
 	// If 1 minute has passed
 	if g.Stage == 1 && time.Since(startTime).Seconds() > StageDuration {
-		g.EnemyImg = LoadSpriteFromSheet(g.EnemySheet, 0, 0)
+		g.EnemyImg = AddBoundingBox(LoadSpriteFromSheet(g.EnemySheet, 0, 0))
 		g.Stage = 2
 	} else if g.Stage == 2 && time.Since(startTime).Seconds() > 2*StageDuration {
-		g.EnemyImg = LoadSpriteFromSheet(g.EnemySheet, 0, 1)
+		g.EnemyImg = AddBoundingBox(LoadSpriteFromSheet(g.EnemySheet, 0, 1))
 		g.Stage = 3
 	} else if g.Stage == 3 && time.Since(startTime).Seconds() > 3*StageDuration {
 		g.Stage = 4

@@ -7,28 +7,21 @@ import (
 )
 
 type Enemy struct {
-	img  *ebiten.Image
-	x, y float64
+	img   *ebiten.Image
+	reach float64
+	x, y  float64
 }
 
 func (enm *Enemy) Update(p *Player) {
-	// Calculate destination point
-	destPointX := p.X
-	destPointY := p.Y
+	// Calculate the difference in position
+	dx := p.X - enm.x
+	dy := p.Y - enm.y
 
-	// Calculate the max distance an enemy could pass
-	mx := (float64(destPointX) - float64(enm.img.Bounds().Dx())/2)
-	my := (float64(destPointY) - float64(enm.img.Bounds().Dy())/2)
-
-	// Calculate the direction vector towards the center
-	dx := mx - enm.x
-	dy := my - enm.y
-
-	// Calculate the distance to the center
+	// Calculate the distance to the destination point (enemy to player)
 	distance := math.Sqrt(dx*dx + dy*dy)
 
 	// If the image is very close to the center, stop moving
-	if distance < 8 {
+	if distance < enm.reach {
 		gameOver = true
 		return
 	}

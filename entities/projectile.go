@@ -9,7 +9,7 @@ import (
 )
 
 type Projectile struct {
-	x, y                 float64
+	x, y                 float64 // These address the CENTER of an image
 	velocityX, velocityY float64
 	rotation             float64
 	active               bool
@@ -42,23 +42,33 @@ func (p *Projectile) Update() {
 	p.y += p.velocityY
 }
 
-func checkCollision(p *Projectile, enm *Enemy) bool {
-	// Repeated use below
-	px, py := p.x, p.y
+// These 2 check functions might be connected using interfaces
+func checkCollision(p *Projectile, e *Enemy) bool {
+	// This seems to hit earlier from top and from left than from right and bottom
 
-	// Enemy width and height (modify if resizing the image)
-	ow, oh := float64(enm.img.Bounds().Dx()), float64(enm.img.Bounds().Dy())
+	// Calculate the difference in position
+	dx := p.x - e.x
+	dy := p.y - e.y
 
-	return px > enm.x && px < enm.x+ow && py > enm.y && py < enm.y+oh
+	// Calculate the distance to the destination point (enemy to player)
+	distance := math.Sqrt(dx*dx + dy*dy)
+
+	// If the distance is smaller than the sprite size, then it reaches
+	isReaching := distance < spriteSize
+
+	return isReaching
 }
 
 func checkPickup(prj *Projectile, plr *Player) bool {
-	// Repeated use below
-	prjx, prjy := prj.x, prj.y
-	plrx, plry := plr.X, plr.Y
+	// Calculate the difference in position
+	dx := prj.x - plr.X
+	dy := prj.y - plr.Y
 
-	// Player width and height (modify if resizing the image)
-	ow, oh := float64(plr.Img.Bounds().Dx()), float64(plr.Img.Bounds().Dy())
+	// Calculate the distance to the destination point (enemy to player)
+	distance := math.Sqrt(dx*dx + dy*dy)
 
-	return prjx > plrx && prjx < plrx+ow && prjy > plry && prjy < plry+oh
+	// If the distance is smaller than the sprite size, then it reaches
+	isReaching := distance < spriteSize // This will be changed to player.reach
+
+	return isReaching
 }

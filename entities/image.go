@@ -2,11 +2,13 @@ package entities
 
 import (
 	"image"
+	"image/color"
 	"log"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 func LoadSpriteFromSheet(sheet *ebiten.Image, posX, posY int) *ebiten.Image {
@@ -14,13 +16,31 @@ func LoadSpriteFromSheet(sheet *ebiten.Image, posX, posY int) *ebiten.Image {
 	x := posX * spriteSize
 	y := posY * spriteSize
 
-	// Define the rectangle for the sprite (assuming they are in one "line")
+	// Define the rectangle for the sprite
 	rect := image.Rect(x, y, x+spriteSize, y+spriteSize)
 
 	// Use SubImage to get the specific sprite
 	subImage := sheet.SubImage(rect).(*ebiten.Image)
 
 	return subImage
+}
+
+func AddBoundingBox(image *ebiten.Image) *ebiten.Image {
+
+	// Create a new image to draw the sprite and bounding box
+	boundingBoxImg := ebiten.NewImage(spriteSize, spriteSize)
+
+	// Draw the sprite onto the new image
+	op := &ebiten.DrawImageOptions{}
+	boundingBoxImg.DrawImage(image, op)
+
+	// Draw the bounding box onto the new image (as 4 lines) x, y, width, height
+	vector.DrawFilledRect(boundingBoxImg, 0, 0, spriteSize, 1, color.RGBA{255, 0, 0, 255}, true)            // top
+	vector.DrawFilledRect(boundingBoxImg, 0, 0, 1, spriteSize, color.RGBA{255, 0, 0, 255}, true)            // left
+	vector.DrawFilledRect(boundingBoxImg, 0, spriteSize-1, spriteSize, 1, color.RGBA{255, 0, 0, 255}, true) // bottom
+	vector.DrawFilledRect(boundingBoxImg, spriteSize-1, 0, 1, spriteSize, color.RGBA{255, 0, 0, 255}, true) // right
+
+	return boundingBoxImg
 }
 
 // Draw background by repeating an image (we prepare it here and redraw later)
