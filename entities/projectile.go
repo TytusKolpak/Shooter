@@ -47,8 +47,8 @@ func checkCollision(p *Projectile, e *Enemy) bool {
 	// This seems to hit earlier from top and from left than from right and bottom
 
 	// Calculate the difference in position
-	dx := p.x - e.x
-	dy := p.y - e.y
+	dx := p.x - spriteSize/2 - e.x
+	dy := p.y - spriteSize/2 - e.y
 
 	// Calculate the distance to the destination point (enemy to player)
 	distance := math.Sqrt(dx*dx + dy*dy)

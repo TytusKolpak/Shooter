@@ -21,11 +21,8 @@ func (p *Player) Draw(screen *ebiten.Image) {
 	// Create a new DrawImageOptions struct
 	opts := &ebiten.DrawImageOptions{}
 
-	// Get the dimensions of the image using Bounds()
-	w, h := p.Img.Bounds().Dx(), p.Img.Bounds().Dy()
-
 	// Translate to the center of the image before rotating
-	opts.GeoM.Translate(-float64(w)/2, -float64(h)/2)
+	opts.GeoM.Translate(-spriteSize/2, -spriteSize/2)
 
 	// Mirror image
 	currentAngle := math.Abs(math.Mod(p.Rotation, 2*math.Pi))

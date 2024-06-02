@@ -1,12 +1,10 @@
 # Todo
 
-1. Pickup hitbox is funky
-2. Reach should change depending on the enemy
-3. Remove enemy clumping
-4. 2 Players
-5. Power ups
-6. Start making documentation
-7. Maybe integrate some tests into the project
+1. Remove enemy clumping
+2. 2 Players
+3. Power ups
+4. Start making documentation
+5. Maybe integrate some tests into the project
 
 ## How to approach documentation
 

@@ -14,8 +14,8 @@ type Enemy struct {
 
 func (enm *Enemy) Update(p *Player) {
 	// Calculate the difference in position
-	dx := p.X - enm.x
-	dy := p.Y - enm.y
+	dx := (p.X - spriteSize/2) - enm.x
+	dy := (p.Y - spriteSize/2) - enm.y
 
 	// Calculate the distance to the destination point (enemy to player)
 	distance := math.Sqrt(dx*dx + dy*dy)
@@ -26,7 +26,7 @@ func (enm *Enemy) Update(p *Player) {
 		return
 	}
 
-	// Normalize the direction vector
+	// Normalize the direction vector (up to 1)
 	dirX := dx / distance
 	dirY := dy / distance
 

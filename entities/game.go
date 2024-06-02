@@ -121,7 +121,7 @@ func (g *Game) Update() error {
 	g.checkPickups()
 
 	// Check if it's time to spawn a new enemy and not last stage
-	if g.Stage != 4 && time.Since(g.SpawnTime).Seconds() >= spawnInterval {
+	if g.Stage != 4 && time.Since(g.SpawnTime).Seconds() >= SpawnInterval {
 		g.spawnNewEnemy()
 
 		// Reset the timer for next spawn
@@ -237,8 +237,15 @@ func (g *Game) ResetGame() {
 func (g *Game) spawnNewEnemy() {
 	// Create a new Enemy
 	enm := &Enemy{
-		img:   g.EnemyImg,
-		reach: spriteSize,
+		img: g.EnemyImg,
+	}
+
+	if g.Stage == 1 {
+		enm.reach = 0.8 * spriteSize
+	} else if g.Stage == 2 {
+		enm.reach = spriteSize
+	} else {
+		enm.reach = 1.2 * spriteSize
 	}
 
 	// Randomly choose an edge (0=left, 1=top, 2=right, 3=bottom)
@@ -312,15 +319,14 @@ func (g *Game) checkPickups() {
 func (g *Game) controlGameStage() {
 	// If 1 minute has passed
 	if g.Stage == 1 && time.Since(startTime).Seconds() > StageDuration {
-		g.EnemyImg = AddBoundingBox(LoadSpriteFromSheet(g.EnemySheet, 0, 0))
 		g.Stage = 2
+		g.EnemyImg = AddBoundingBox(LoadSpriteFromSheet(g.EnemySheet, 0, 0))
 	} else if g.Stage == 2 && time.Since(startTime).Seconds() > 2*StageDuration {
-		g.EnemyImg = AddBoundingBox(LoadSpriteFromSheet(g.EnemySheet, 0, 1))
 		g.Stage = 3
+		g.EnemyImg = AddBoundingBox(LoadSpriteFromSheet(g.EnemySheet, 0, 1))
 	} else if g.Stage == 3 && time.Since(startTime).Seconds() > 3*StageDuration {
 		g.Stage = 4
 	} else if g.Stage == 4 && len(g.Enemies) == 0 {
-		fmt.Println("Last stage and no enemies")
 		// You win
 		gameOver = true
 	}

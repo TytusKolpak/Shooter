@@ -20,7 +20,7 @@ const (
 	StageDuration     = 10 // Seconds
 
 	maxEnemySpeed = 0.75
-	spawnInterval = 2
+	SpawnInterval = 1
 
 	spriteSize = 32
 )
